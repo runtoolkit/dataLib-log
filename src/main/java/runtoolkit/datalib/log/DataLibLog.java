@@ -6,7 +6,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.DataPackContents;
+import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +17,8 @@ public class DataLibLog implements ModInitializer {
 
     private static final int POLL_INTERVAL_TICKS = 20;
     private int tickCounter = 0;
+
+    private static final Identifier ENGINE_ID = new Identifier("datalib", "engine");
 
     @Override
     public void onInitialize() {
@@ -29,9 +31,8 @@ public class DataLibLog implements ModInitializer {
         tickCounter = 0;
 
         try {
-            // Yarn 1.21.1: getDataCommandStorage()
             var storage = server.getDataCommandStorage();
-            NbtCompound engineStorage = storage.get("datalib", "engine");
+            NbtCompound engineStorage = storage.get(ENGINE_ID);
             if (engineStorage == null || !engineStorage.contains("log_display", NbtElement.LIST_TYPE)) return;
 
             NbtList logDisplay = engineStorage.getList("log_display", NbtElement.COMPOUND_TYPE);
@@ -39,26 +40,20 @@ public class DataLibLog implements ModInitializer {
 
             for (NbtElement entry : logDisplay) {
                 if (!(entry instanceof NbtCompound compound)) continue;
-                String text = compound.getString("text");
-                emitToServerLog(text);
+                emitToServerLog(compound.getString("text"));
             }
 
             engineStorage.remove("log_display");
-            storage.set("datalib", "engine", engineStorage);
+            storage.set(ENGINE_ID, engineStorage);
         } catch (Exception e) {
             LOGGER.warn("[DataLib] Log poll failed: {}", e.getMessage());
         }
     }
 
     private void emitToServerLog(String text) {
-        if (text.startsWith("[ERROR]")) {
-            LOGGER.error("[DataLib] {}", text);
-        } else if (text.startsWith("[WARN]")) {
-            LOGGER.warn("[DataLib] {}", text);
-        } else if (text.startsWith("[DEBUG]")) {
-            LOGGER.debug("[DataLib] {}", text);
-        } else {
-            LOGGER.info("[DataLib] {}", text);
-        }
+        if (text.startsWith("[ERROR]")) LOGGER.error("[DataLib] {}", text);
+        else if (text.startsWith("[WARN]")) LOGGER.warn("[DataLib] {}", text);
+        else if (text.startsWith("[DEBUG]")) LOGGER.debug("[DataLib] {}", text);
+        else LOGGER.info("[DataLib] {}", text);
     }
 }
