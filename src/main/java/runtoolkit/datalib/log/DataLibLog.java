@@ -18,7 +18,7 @@ public class DataLibLog implements ModInitializer {
     private static final int POLL_INTERVAL_TICKS = 20;
     private int tickCounter = 0;
 
-    private static final Identifier ENGINE_ID = new Identifier("datalib", "engine");
+    private static final Identifier ENGINE_ID = Identifier.of("datalib", "engine");
 
     @Override
     public void onInitialize() {
