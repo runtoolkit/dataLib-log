@@ -28,6 +28,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
+          validate-wrappers: false
           gradle-home-cache-cleanup: true
 
       - name: Clean Loom cache
@@ -46,5 +47,5 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: datalib-log
+          name: datalib-mod
           path: build/libs/*.jar
